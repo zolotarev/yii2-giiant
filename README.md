@@ -17,9 +17,9 @@ ____
             ...
 
 
-Extended models and CRUDs for Gii, the code generator of Yii2 Framework
 
-**PROJECT IS IN BETA STAGE!**
+
+**ПРОЕКТ В РАЗРАБОТКЕ!**
 
 
 What is it?
