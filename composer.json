@@ -1,6 +1,6 @@
 {
     "name": "zolotarev/yii2-giiant",
-    "description": "Gii CRUD generator for Yii 2 Framework",
+    "description": "EXTENDED Gii CRUD generator for Yii 2 Framework",
     "keywords": ["yii2", "gii", "crud", "its"],
     "homepage": "https://github.com/zolotarev/yii2-giiant",
     "type": "yii2-extension",

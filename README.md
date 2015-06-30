@@ -1,4 +1,4 @@
-yii2-giiant
+yii2-giiant-EXTENDED
 ===========
 
 Extended models and CRUDs for Gii, the code generator of Yii2 Framework
