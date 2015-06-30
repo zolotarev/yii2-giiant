@@ -75,15 +75,15 @@ rules. Take a look at some existing [giiant providers](https://github.com/schmun
 
 Configure providers, add this to your provider list in the form:
 
-    \schmunk42\giiant\crud\providers\EditorProvider,
-    \schmunk42\giiant\crud\providers\SelectProvider,
-    \schmunk42\giiant\crud\providers\OptsProvider,
+    \zolotarev\giiant\crud\providers\EditorProvider,
+    \zolotarev\giiant\crud\providers\SelectProvider,
+    \zolotarev\giiant\crud\providers\OptsProvider,
     
 
 And configure the settings of the provider, add setting via dependecy injection this to your application config, eg. in `console/config/bootstrap.php`:
 
     \Yii::$container->set(
-        'schmunk42\giiant\crud\providers\EditorProvider',
+        'zolotarev\giiant\crud\providers\EditorProvider',
         [
             'columnNames' => ['description']
         ]
@@ -208,7 +208,7 @@ Finally add the configuration via DI container
 
 ```
 \Yii::$container->set(
-    'schmunk42\giiant\crud\providers\CallbackProvider',
+    'zolotarev\giiant\crud\providers\CallbackProvider',
     [
         'activeFields'  => $activeFields,
         'columnFormats' => $columnFormats,
@@ -231,7 +231,7 @@ $config['modules']['gii'] = [
         // generator name
         'giiant-model' => [
             //generator class
-            'class'     => 'schmunk42\giiant\model\Generator',
+            'class'     => 'zolotarev\giiant\model\Generator',
             //setting for out templates
             'templates' => [
                 // template name => path to template

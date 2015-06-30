@@ -6,7 +6,7 @@
  * Time: 22:40
  */
 
-namespace schmunk42\giiant\crud\callbacks\devgroup;
+namespace zolotarev\giiant\crud\callbacks\devgroup;
 
 
 use dmstr\modules\widgets\helpers\StringFormatter;

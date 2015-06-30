@@ -5,13 +5,14 @@
  * @license   http://www.yiiframework.com/license/
  */
 
-namespace schmunk42\giiant\crud;
+namespace zolotarev\giiant\crud;
 
-use schmunk42\giiant\crud\providers\CallbackProvider;
-use schmunk42\giiant\crud\providers\DateTimeProvider;
-use schmunk42\giiant\crud\providers\EditorProvider;
-use schmunk42\giiant\crud\providers\OptsProvider;
-use schmunk42\giiant\crud\providers\RelationProvider;
+use Codeception\Module\Yii2;
+use zolotarev\giiant\crud\providers\CallbackProvider;
+use zolotarev\giiant\crud\providers\DateTimeProvider;
+use zolotarev\giiant\crud\providers\EditorProvider;
+use zolotarev\giiant\crud\providers\OptsProvider;
+use zolotarev\giiant\crud\providers\RelationProvider;
 use Yii;
 use yii\base\Exception;
 use yii\db\ActiveQuery;
@@ -110,9 +111,9 @@ class Generator extends \yii\gii\generators\crud\Generator
                 if (!$class) {
                     continue;
                 }
-                $obj            = \Yii::createObject(['class' => $class]);
+                $obj = \Yii::createObject(['class' => $class]);
                 $obj->generator = $this;
-                $this->_p[]     = $obj;
+                $this->_p[] = $obj;
                 #\Yii::trace("Initialized provider '{$class}'", __METHOD__);
             }
         }
@@ -129,8 +130,8 @@ class Generator extends \yii\gii\generators\crud\Generator
             parent::hints(),
             [
                 'providerList' => 'Comma separated list of provider class names, make sure you are using the full namespaced path <code>app\providers\CustomProvider1,<br/>app\providers\CustomProvider2</code>.',
-                'viewPath'     => 'Output path for view files, eg. <code>@backend/views/crud</code>.',
-                'pathPrefix'   => 'Customized route/subfolder for controllers and views eg. <code>crud/</code>. <b>Note!</b> Should correspond to <code>viewPath</code>.',
+                'viewPath' => 'Output path for view files, eg. <code>@backend/views/crud</code>.',
+                'pathPrefix' => 'Customized route/subfolder for controllers and views eg. <code>crud/</code>. <b>Note!</b> Should correspond to <code>viewPath</code>.',
             ]
         );
     }
@@ -170,22 +171,11 @@ class Generator extends \yii\gii\generators\crud\Generator
             return 'label';
         }
         foreach ($modelClass::getTableSchema()->getColumnNames() as $name) {
-            switch (strtolower($name)) {
-                case 'name':
-                case 'title':
-                case 'name_id':
-                case 'default_title':
-                case 'default_name':
-                    return $name;
-                    break;
-                default:
-                    continue;
-                    break;
-            }
+            if (in_array($name, array(Yii::$app->params['giiantConfig']['labelFieldsNames'])))
+                return $name;
 
+            return $modelClass::primaryKey()[0];
         }
-
-        return $modelClass::primaryKey()[0];
     }
 
     public function getModelByTableName($name)
@@ -211,7 +201,7 @@ class Generator extends \yii\gii\generators\crud\Generator
      */
     public function getControllerID()
     {
-        $pos   = strrpos($this->controllerClass, '\\');
+        $pos = strrpos($this->controllerClass, '\\');
         $class = substr(substr($this->controllerClass, $pos + 1), 0, -10);
 
         return Inflector::camel2id($class, '-', true);
@@ -248,8 +238,8 @@ class Generator extends \yii\gii\generators\crud\Generator
     public function getModelRelations($modelClass, $types = ['belongs_to', 'many_many', 'has_many', 'has_one', 'pivot'])
     {
         $reflector = new \ReflectionClass($modelClass);
-        $model     = new $modelClass;
-        $stack     = [];
+        $model = new $modelClass;
+        $stack = [];
         foreach ($reflector->getMethods() AS $method) {
             if (in_array(substr($method->name, 3), $this->skipRelations)) {
                 continue;
@@ -411,7 +401,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         /* @var $class ActiveRecord */
         $class = $this->modelClass;
-        $pks   = $class::primaryKey();
+        $pks = $class::primaryKey();
         if (count($pks) === 1) {
             return '$' . $pks[0]; // fix for non-id columns
         } else {
@@ -426,7 +416,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         /* @var $class ActiveRecord */
         $class = $this->modelClass;
-        $pks   = $class::primaryKey();
+        $pks = $class::primaryKey();
         if (($table = $this->getTableSchema()) === false) {
             $params = [];
             foreach ($pks as $pk) {
@@ -455,7 +445,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         /* @var $class ActiveRecord */
         $class = $this->modelClass;
-        $pks   = $class::primaryKey();
+        $pks = $class::primaryKey();
         if (count($pks) === 1) {
             if (is_subclass_of($class, 'yii\mongodb\ActiveRecord')) {
                 return "'id' => (string)\$model->{$pks[0]}";
@@ -480,7 +470,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         $model = new $relation->modelClass;
         $table = $model->tableSchema;
-        $pk    = $table->primaryKey;
+        $pk = $table->primaryKey;
         if (count($pk) !== 2) {
             return false;
         }
@@ -554,7 +544,8 @@ class Generator extends \yii\gii\generators\crud\Generator
         return "        '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "'";
     }
 
-    public function getColumnByAttribute($attribute, $model = null){
+    public function getColumnByAttribute($attribute, $model = null)
+    {
         if (is_string($model)) {
             $model = new $model;
         }

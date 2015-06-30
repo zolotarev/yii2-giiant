@@ -8,7 +8,7 @@ The following code should be added to the bootstrap of your yii application.  If
 Use a DateTimePicker for the `scheduled_at` field:
 
 ```php
-\Yii::$container->set('schmunk42\giiant\crud\providers\DateTimeProvider', [
+\Yii::$container->set('zolotarev\giiant\crud\providers\DateTimeProvider', [
     'columnNames' => ['scheduled_at'],
 ]);
 ```
@@ -214,7 +214,7 @@ $appendActiveFields = [
 To invoke the callback provider we pass in our callbacks as follows:
 
 ```php
-\Yii::$container->set('schmunk42\giiant\crud\providers\CallbackProvider', [
+\Yii::$container->set('zolotarev\giiant\crud\providers\CallbackProvider', [
     'columnFormats' => $columnFormats,
     'attributeFormats' => $attributeFormats,
     'activeFields' => $activeFields,

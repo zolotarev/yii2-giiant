@@ -6,7 +6,7 @@
  * Time: 23:23
  */
 
-namespace schmunk42\giiant\crud\callbacks\yii;
+namespace zolotarev\giiant\crud\callbacks\yii;
 
 
 class Image

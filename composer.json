@@ -19,10 +19,10 @@
     },
     "autoload": {
         "psr-4": {
-            "schmunk42\\giiant\\": ""
+            "zolotarev\\giiant\\": ""
         }
     },
     "extra": {
-        "bootstrap": "schmunk42\\giiant\\Bootstrap"
+        "bootstrap": "zolotarev\\giiant\\Bootstrap"
     }
 }

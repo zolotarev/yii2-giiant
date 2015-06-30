@@ -5,7 +5,7 @@
  * @license http://www.phundament.com/license/
  */
 
-namespace schmunk42\giiant\model;
+namespace zolotarev\giiant\model;
 
 use Yii;
 use yii\gii\CodeFile;

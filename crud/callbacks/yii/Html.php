@@ -1,6 +1,6 @@
 <?php
 
-namespace schmunk42\giiant\crud\callbacks\yii;
+namespace zolotarev\giiant\crud\callbacks\yii;
 
 class Html
 {

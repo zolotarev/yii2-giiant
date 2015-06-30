@@ -1,14 +1,14 @@
 <?php
-namespace schmunk42\giiant\crud\providers;
+namespace zolotarev\giiant\crud\providers;
 
 use yii\db\ColumnSchema;
 
 /**
  * Class OptsProvider
- * @package schmunk42\giiant\crud\providers
+ * @package zolotarev\giiant\crud\providers
  * @author Christopher Stebe <c.stebe@herzogkommunikation.de>
  */
-class OptsProvider extends \schmunk42\giiant\base\Provider
+class OptsProvider extends \zolotarev\giiant\base\Provider
 {
 	public function activeField($attribute)
 	{

@@ -6,13 +6,13 @@
  * Time: 10:21
  */
 
-namespace schmunk42\giiant\crud\providers;
+namespace zolotarev\giiant\crud\providers;
 
 use yii\db\ActiveRecord;
 use yii\db\ColumnSchema;
 use yii\helpers\Inflector;
 
-class RelationProvider extends \schmunk42\giiant\base\Provider
+class RelationProvider extends \zolotarev\giiant\base\Provider
 {
     /**
      * @var null can be null (default) or `select2`
