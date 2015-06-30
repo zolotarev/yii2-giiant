@@ -3,12 +3,10 @@ yii2-giiant-EXTENDED
 
 Что добавлено
 -----------
-- Именные поля теперь нужно указывать в конфиге
- 
+- Именные поля теперь нужно указывать в конфиге\
     Yii::$app->params['giiantConfig']['labelFieldsNames']:
-    
     Например:
-  
+
     'params' => [
             ...
             'giiantConfig' => [
@@ -19,7 +17,7 @@ yii2-giiant-EXTENDED
                 ],
             ],
             ...
-            
+
 
 Extended models and CRUDs for Gii, the code generator of Yii2 Framework
 
