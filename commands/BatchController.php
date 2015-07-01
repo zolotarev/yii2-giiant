@@ -1,8 +1,8 @@
 <?php
 
-namespace zolotarev\giiant\commands;
+namespace schmunk42\giiant\commands;
 
-use zolotarev\giiant\crud\Generator;
+use schmunk42\giiant\crud\Generator;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Inflector;
@@ -104,24 +104,9 @@ class BatchController extends Controller
     public $crudSkipRelations = [];
 
     /**
-     * @var bool indicates whether to generate ActiveQuery for the ActiveRecord class
+     * @var application configuration for creating temporary applications
      */
-    public $modelGenerateQuery = true;
-
-    /**
-     * @var string the namespace of the ActiveQuery class to be generated
-     */
-    public $modelQueryNamespace = 'app\models\query';
-
-    /**
-     * @var string the base class of the new ActiveQuery class
-     */
-    public $modelQueryBaseClass = 'yii\db\ActiveQuery';
-
-    /**
-     * @var array application configuration for creating temporary applications
-     */
-    protected $appConfig;
+    private $appConfig;
 
     /**
      * @inheritdoc
@@ -147,10 +132,7 @@ class BatchController extends Controller
                 'crudPathPrefix',
                 'crudProviders',
                 'crudSkipRelations',
-                'crudBaseControllerClass',
-                'modelGenerateQuery',
-                'modelQueryNamespace',
-                'modelQueryBaseClass',
+                'crudBaseControllerClass'
             ]
         );
     }
@@ -210,10 +192,7 @@ class BatchController extends Controller
                 'modelClass'         => isset($this->tableNameMap[$table]) ? $this->tableNameMap[$table] :
                     Inflector::camelize($table), // TODO: setting is not recognized in giiant
                 'baseClass'          => $this->modelBaseClass,
-                'tableNameMap'       => $this->tableNameMap,
-                'generateQuery'      => $this->modelGenerateQuery,
-                'queryNs'            => $this->modelQueryNamespace,
-                'queryBaseClass'     => $this->modelQueryBaseClass,
+                'tableNameMap'       => $this->tableNameMap
             ];
             $route  = 'gii/giiant-model';
 

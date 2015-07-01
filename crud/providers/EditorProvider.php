@@ -6,23 +6,23 @@
  * Time: 10:21
  */
 
-namespace zolotarev\giiant\crud\providers;
+namespace schmunk42\giiant\crud\providers;
 
 use yii\db\ColumnSchema;
 
-class EditorProvider extends \zolotarev\giiant\base\Provider
+class EditorProvider extends \schmunk42\giiant\base\Provider
 {
-    public function activeField($attribute)
+    public function activeField(ColumnSchema $attribute)
     {
-        if (!isset($this->generator->getTableSchema()->columns[$attribute])) {
+        if (!isset($this->generator->getTableSchema()->columns[$attribute->name])) {
             return null;
         }
-        $column = $this->generator->getTableSchema()->columns[$attribute];
+        $column = $this->generator->getTableSchema()->columns[$attribute->name];
         switch (true) {
             case (in_array($column->name, $this->columnNames)):
                 $this->generator->requires[] = '2amigos/yii2-ckeditor-widget';
                 return <<<EOS
-\$form->field(\$model, '{$attribute}')->widget(
+\$form->field(\$model, '{$attribute->name}')->widget(
     \dosamigos\ckeditor\CKEditor::className(),
     [
         'options' => ['rows' => 6],

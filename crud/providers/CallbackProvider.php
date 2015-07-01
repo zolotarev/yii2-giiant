@@ -6,9 +6,9 @@
  * Time: 01:01
  */
 
-namespace zolotarev\giiant\crud\providers;
+namespace schmunk42\giiant\crud\providers;
 
-class CallbackProvider extends \zolotarev\giiant\base\Provider
+class CallbackProvider extends \schmunk42\giiant\base\Provider
 {
     public $activeFields = [];
     public $prependActiveFields = [];
@@ -16,45 +16,44 @@ class CallbackProvider extends \zolotarev\giiant\base\Provider
     public $attributeFormats = [];
     public $columnFormats = [];
 
-
-    public function activeField($attribute, $model, $generator)
+    public function activeField($column, $model)
     {
-        $key = $this->findValue($this->getModelKey($attribute, $model), $this->activeFields);
+        $key = $this->findValue($this->getModelKey($column->name, $model), $this->activeFields);
         if ($key) {
-            return $this->activeFields[$key]($attribute, $model, $generator);
+            return $this->activeFields[$key]($column, $model);
         }
     }
 
-    public function prependActiveField($attribute, $model, $generator)
+    public function prependActiveField($column, $model)
     {
-        $key = $this->findValue($this->getModelKey($attribute, $model), $this->prependActiveFields);
+        $key = $this->findValue($this->getModelKey($column->name, $model), $this->prependActiveFields);
         if ($key) {
-            return $this->prependActiveFields[$key]($attribute, $model, $generator);
+            return $this->prependActiveFields[$key]($column, $model);
         }
     }
 
-    public function appendActiveField($attribute, $model, $generator)
+    public function appendActiveField($column, $model)
     {
-        $key = $this->findValue($this->getModelKey($attribute, $model), $this->appendActiveFields);
+        $key = $this->findValue($this->getModelKey($column->name, $model), $this->appendActiveFields);
         if ($key) {
-            return $this->appendActiveFields[$key]($attribute, $model, $generator);
+            return $this->appendActiveFields[$key]($column, $model);
         }
     }
 
 
-    public function attributeFormat($attribute, $model, $generator)
+    public function attributeFormat($column, $model)
     {
-        $key = $this->findValue($this->getModelKey($attribute, $model), $this->attributeFormats);
+        $key = $this->findValue($this->getModelKey($column->name, $model), $this->attributeFormats);
         if ($key) {
-            return $this->attributeFormats[$key]($attribute, $model, $generator);
+            return $this->attributeFormats[$key]($column, $model);
         }
     }
 
-    public function columnFormat($attribute, $model, $generator)
+    public function columnFormat($column, $model)
     {
-        $key = $this->findValue($this->getModelKey($attribute, $model), $this->columnFormats);
+        $key = $this->findValue($this->getModelKey($column->name, $model), $this->columnFormats);
         if ($key) {
-            return $this->columnFormats[$key]($attribute, $model, $generator);
+            return $this->columnFormats[$key]($column, $model);
         }
     }
 

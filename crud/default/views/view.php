@@ -5,17 +5,8 @@ use yii\helpers\StringHelper;
 
 /**
  * @var yii\web\View $this
- * @var zolotarev\giiant\crud\Generator $generator
+ * @var schmunk42\giiant\crud\Generator $generator
  */
-
-/** @var \yii\db\ActiveRecord $model */
-$model = new $generator->modelClass;
-$model->setScenario('crud');
-
-$safeAttributes = $model->safeAttributes();
-if (empty($safeAttributes)) {
-    $safeAttributes = $model->getTableSchema()->columnNames;
-}
 
 $urlParams = $generator->generateUrlParams();
 
@@ -45,15 +36,13 @@ Inflector::pluralize(
 $this->params['breadcrumbs'][] = ['label' => (string)$model-><?=$generator->getNameAttribute() ?>, 'url' => ['view', <?= $urlParams ?>]];
 $this->params['breadcrumbs'][] = <?= $generator->generateString('View') ?>;
 ?>
-<div class="giiant-crud <?= Inflector::camel2id(StringHelper::basename($generator->modelClass), '-', true) ?>-view">
+<div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass), '-', true) ?>-view">
 
     <!-- menu buttons -->
     <p class='pull-left'>
+        <?= "<?= " ?>Html::a('<span class="glyphicon glyphicon-list"></span> ' . <?= $generator->generateString('List') ?>, ['index'], ['class'=>'btn btn-default']) ?>
         <?= "<?= " ?>Html::a('<span class="glyphicon glyphicon-pencil"></span> ' . <?= $generator->generateString('Edit') ?>, ['update', <?= $urlParams ?>],['class' => 'btn btn-info']) ?>
         <?= "<?= " ?>Html::a('<span class="glyphicon glyphicon-plus"></span> ' . <?= $generator->generateString('New') ?>, ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-    <p class="pull-right">
-        <?= "<?= " ?>Html::a('<span class="glyphicon glyphicon-list"></span> ' . <?= $generator->generateString('List '.Inflector::pluralize(StringHelper::basename($generator->modelClass))) ?>, ['index'], ['class'=>'btn btn-default']) ?>
     </p>
 
     <div class="clearfix"></div>
@@ -70,9 +59,8 @@ $this->params['breadcrumbs'][] = <?= $generator->generateString('View') ?>;
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h2>
-                <?= "<?= \$model->" . $generator->getModelNameAttribute($generator->modelClass) . " ?>" ?>
-            </h2>
+            <?php $label = StringHelper::basename($generator->modelClass); ?>
+            <?= "<?= \$model->" . $generator->getModelNameAttribute($generator->modelClass) . " ?>" ?>
         </div>
 
         <div class="panel-body">
@@ -87,9 +75,9 @@ $this->params['breadcrumbs'][] = <?= $generator->generateString('View') ?>;
     'model' => $model,
     'attributes' => [
     <?php
-    foreach ($safeAttributes as $attribute) {
-        $format = $generator->attributeFormat($attribute);
-        if (!$format) {
+    foreach ($generator->getTableSchema()->columns as $column) {
+        $format = $generator->attributeFormat($column);
+        if ($format === false) {
             continue;
         } else {
             echo $format . ",\n";
@@ -110,13 +98,9 @@ $this->params['breadcrumbs'][] = <?= $generator->generateString('View') ?>;
     <?= "<?php \$this->endBlock(); ?>\n\n"; ?>
 
     <?php
-
-    // get relation info $ prepare add button
-    $model          = new $generator->modelClass;
-
     $items = <<<EOS
 [
-    'label'   => '<b class=""># '.\$model->{$model->primaryKey()[0]}.'</b>',
+    'label'   => '<span class="glyphicon glyphicon-asterisk"></span> $label',
     'content' => \$this->blocks['{$generator->modelClass}'],
     'active'  => true,
 ],
@@ -126,6 +110,8 @@ EOS;
 
         echo "\n<?php \$this->beginBlock('$name'); ?>\n";
 
+        // get relation info $ prepare add button
+        $model          = new $generator->modelClass;
         $showAllRecords = false;
 
         if ($relation->via !== null) {

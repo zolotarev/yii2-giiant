@@ -5,14 +5,13 @@
  * @license   http://www.yiiframework.com/license/
  */
 
-namespace zolotarev\giiant\crud;
+namespace schmunk42\giiant\crud;
 
-use Codeception\Module\Yii2;
-use zolotarev\giiant\crud\providers\CallbackProvider;
-use zolotarev\giiant\crud\providers\DateTimeProvider;
-use zolotarev\giiant\crud\providers\EditorProvider;
-use zolotarev\giiant\crud\providers\OptsProvider;
-use zolotarev\giiant\crud\providers\RelationProvider;
+use schmunk42\giiant\crud\providers\CallbackProvider;
+use schmunk42\giiant\crud\providers\DateTimeProvider;
+use schmunk42\giiant\crud\providers\EditorProvider;
+use schmunk42\giiant\crud\providers\OptsProvider;
+use schmunk42\giiant\crud\providers\RelationProvider;
 use Yii;
 use yii\base\Exception;
 use yii\db\ActiveQuery;
@@ -58,10 +57,6 @@ class Generator extends \yii\gii\generators\crud\Generator
      */
     public $gridMaxColumns = 8;
     /**
-     * @var int maximum number of columns to show in grid
-     */
-    public $gridRelationMaxColumns = 8;
-    /**
      * @var array array of composer packages (only to show information to the developer in the web UI)
      */
     public $requires = [];
@@ -99,6 +94,17 @@ class Generator extends \yii\gii\generators\crud\Generator
         return $return;
     }
 
+    /**
+     * Prepare providers
+     *
+     * @return bool|void
+     */
+    public function init()
+    {
+        \Yii::trace("Initializing giiant CRUD generator for model '{$this->modelClass}'", __METHOD__);
+        parent::init();
+    }
+
     private function initializeProviders()
     {
         // TODO: this is a hotfix for an already initialized provider queue on action re-entry
@@ -111,14 +117,12 @@ class Generator extends \yii\gii\generators\crud\Generator
                 if (!$class) {
                     continue;
                 }
-                $obj = \Yii::createObject(['class' => $class]);
+                $obj            = \Yii::createObject(['class' => $class]);
                 $obj->generator = $this;
-                $this->_p[] = $obj;
+                $this->_p[]     = $obj;
                 #\Yii::trace("Initialized provider '{$class}'", __METHOD__);
             }
         }
-        \Yii::trace("CRUD providers initialized for model '{$this->modelClass}'", __METHOD__);
-
     }
 
     /**
@@ -130,8 +134,8 @@ class Generator extends \yii\gii\generators\crud\Generator
             parent::hints(),
             [
                 'providerList' => 'Comma separated list of provider class names, make sure you are using the full namespaced path <code>app\providers\CustomProvider1,<br/>app\providers\CustomProvider2</code>.',
-                'viewPath' => 'Output path for view files, eg. <code>@backend/views/crud</code>.',
-                'pathPrefix' => 'Customized route/subfolder for controllers and views eg. <code>crud/</code>. <b>Note!</b> Should correspond to <code>viewPath</code>.',
+                'viewPath'     => 'Output path for view files, eg. <code>@backend/views/crud</code>.',
+                'pathPrefix'   => 'Customized route/subfolder for controllers and views eg. <code>crud/</code>. <b>Note!</b> Should correspond to <code>viewPath</code>.',
             ]
         );
     }
@@ -170,12 +174,12 @@ class Generator extends \yii\gii\generators\crud\Generator
         if ($model->hasMethod('getLabel')) {
             return 'label';
         }
-        foreach ($modelClass::getTableSchema()->getColumnNames() as $name) {
-            if (in_array($name, array(Yii::$app->params['giiantConfig']['labelFieldsNames'])))
-                return $name;
 
-            return $modelClass::primaryKey()[0];
+        foreach ($modelClass::getTableSchema()->getColumnNames() as $name) {
+            if (in_array($name, Yii::$app->params['giiantConfig']['labelFieldsNames']))
+                return $name;
         }
+        return $modelClass::primaryKey()[0];
     }
 
     public function getModelByTableName($name)
@@ -201,7 +205,7 @@ class Generator extends \yii\gii\generators\crud\Generator
      */
     public function getControllerID()
     {
-        $pos = strrpos($this->controllerClass, '\\');
+        $pos   = strrpos($this->controllerClass, '\\');
         $class = substr(substr($this->controllerClass, $pos + 1), 0, -10);
 
         return Inflector::camel2id($class, '-', true);
@@ -218,7 +222,7 @@ class Generator extends \yii\gii\generators\crud\Generator
         $relations = $this->getModelRelations($model);
         foreach ($relations AS $relation) {
             // TODO: check multiple link(s)
-            if ($relation->link && reset($relation->link) == $column->name) {
+            if (reset($relation->link) == $column->name) {
                 return $relation;
             }
         }
@@ -238,8 +242,8 @@ class Generator extends \yii\gii\generators\crud\Generator
     public function getModelRelations($modelClass, $types = ['belongs_to', 'many_many', 'has_many', 'has_one', 'pivot'])
     {
         $reflector = new \ReflectionClass($modelClass);
-        $model = new $modelClass;
-        $stack = [];
+        $model     = new $modelClass;
+        $stack     = [];
         foreach ($reflector->getMethods() AS $method) {
             if (in_array(substr($method->name, 3), $this->skipRelations)) {
                 continue;
@@ -310,87 +314,69 @@ class Generator extends \yii\gii\generators\crud\Generator
      *
      * @return mixed|string
      */
-    public function activeField($attribute, $model = null)
+    public function activeField(ColumnSchema $column, $model = null)
     {
+        Yii::trace("Rendering activeField for '{$column->name}'", __METHOD__);
         if ($model === null) {
             $model = $this->modelClass;
         }
-        $code = $this->callProviderQueue(__FUNCTION__, $attribute, $model, $this);
+        $code = $this->callProviderQueue(__FUNCTION__, $column, $model);
         if ($code !== null) {
-            Yii::trace("found provider for '{$attribute}'", __METHOD__);
             return $code;
         } else {
-            $column = $this->getColumnByAttribute($attribute);
-            if (!$column) {
-                return null;
-            } else {
-                return parent::generateActiveField($attribute);
-            }
-        }
+            return parent::generateActiveField($column->name);
+        };
     }
 
-    public function prependActiveField($attribute, $model = null)
+    public function prependActiveField(ColumnSchema $column, $model = null)
     {
+        Yii::trace("Rendering activeField for '{$column->name}'", __METHOD__);
         if ($model === null) {
             $model = $this->modelClass;
         }
-        $code = $this->callProviderQueue(__FUNCTION__, $attribute, $model, $this);
-        if ($code) {
-            Yii::trace("found provider for '{$attribute}'", __METHOD__);
-        }
-        return $code;
+        return $this->callProviderQueue(__FUNCTION__, $column, $model);
     }
 
-    public function appendActiveField($attribute, $model = null)
+    public function appendActiveField(ColumnSchema $column, $model = null)
     {
+        Yii::trace("Rendering activeField for '{$column->name}'", __METHOD__);
         if ($model === null) {
             $model = $this->modelClass;
         }
-        $code = $this->callProviderQueue(__FUNCTION__, $attribute, $model, $this);
-        if ($code) {
-            Yii::trace("found provider for '{$attribute}'", __METHOD__);
-        }
-        return $code;
+        return $this->callProviderQueue(__FUNCTION__, $column, $model);
     }
 
-    public function columnFormat($attribute, $model = null)
+    public function columnFormat(ColumnSchema $column, $model = null)
     {
+        Yii::trace("Rendering columnFormat for '{$column->name}'", __METHOD__);
         if ($model === null) {
             $model = $this->modelClass;
         }
-        $code = $this->callProviderQueue(__FUNCTION__, $attribute, $model, $this);
+        $code = $this->callProviderQueue(__FUNCTION__, $column, $model);
         if ($code !== null) {
-            Yii::trace("found provider for '{$attribute}'", __METHOD__);
+            return $code;
         } else {
-            $code = $this->shorthandAttributeFormat($attribute, $model);
-            Yii::trace("using standard formatting for '{$attribute}'", __METHOD__);
-        }
-        return $code;
+            return $this->shorthandAttributeFormat($column);
+        };
     }
 
-    public function attributeFormat($attribute, $model = null)
+    public function attributeFormat(ColumnSchema $column, $model = null)
     {
+        Yii::trace("Rendering attributeFormat for '{$column->name}'", __METHOD__);
         if ($model === null) {
             $model = $this->modelClass;
         }
-        $code = $this->callProviderQueue(__FUNCTION__, $attribute, $model, $this);
+        $code = $this->callProviderQueue(__FUNCTION__, $column, $model);
         if ($code !== null) {
-            Yii::trace("found provider for '{$attribute}'", __METHOD__);
             return $code;
         }
-
-        $column = $this->getColumnByAttribute($attribute);
-        if (!$column) {
-            return null;
-        } else {
-            return $this->shorthandAttributeFormat($attribute, $model);
-        }
+        return $this->shorthandAttributeFormat($column);
         // don't call parent anymore
     }
 
     public function relationGrid($name, $relation, $showAllRecords = false)
     {
-        Yii::trace("calling provider queue for '$name'", __METHOD__);
+        Yii::trace("Rendering relationGrid", __METHOD__);
         return $this->callProviderQueue(__FUNCTION__, $name, $relation, $showAllRecords);
     }
 
@@ -401,7 +387,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         /* @var $class ActiveRecord */
         $class = $this->modelClass;
-        $pks = $class::primaryKey();
+        $pks   = $class::primaryKey();
         if (count($pks) === 1) {
             return '$' . $pks[0]; // fix for non-id columns
         } else {
@@ -416,7 +402,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         /* @var $class ActiveRecord */
         $class = $this->modelClass;
-        $pks = $class::primaryKey();
+        $pks   = $class::primaryKey();
         if (($table = $this->getTableSchema()) === false) {
             $params = [];
             foreach ($pks as $pk) {
@@ -445,7 +431,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         /* @var $class ActiveRecord */
         $class = $this->modelClass;
-        $pks = $class::primaryKey();
+        $pks   = $class::primaryKey();
         if (count($pks) === 1) {
             if (is_subclass_of($class, 'yii\mongodb\ActiveRecord')) {
                 return "'id' => (string)\$model->{$pks[0]}";
@@ -470,7 +456,7 @@ class Generator extends \yii\gii\generators\crud\Generator
     {
         $model = new $relation->modelClass;
         $table = $model->tableSchema;
-        $pk = $table->primaryKey;
+        $pk    = $table->primaryKey;
         if (count($pk) !== 2) {
             return false;
         }
@@ -491,7 +477,7 @@ class Generator extends \yii\gii\generators\crud\Generator
         }
     }
 
-    private function callProviderQueue($func, $args, $generator)
+    private function callProviderQueue($func, $args)
     {
         $this->initializeProviders(); // TODO: should be done on init, but providerList is empty
         //var_dump($this->_p);exit;
@@ -518,40 +504,22 @@ class Generator extends \yii\gii\generators\crud\Generator
         }
     }
 
-    private function shorthandAttributeFormat($attribute, $model)
+    private function shorthandAttributeFormat($attribute)
     {
-        $column = $this->getColumnByAttribute($attribute, $model);
-        if (!$column) {
-            Yii::trace("No column for '{$attribute}' found", __METHOD__);
-            return null;
-        } else {
-            Yii::trace("Table column detected for '{$attribute}'", __METHOD__);
-        }
-        if ($column->phpType === 'boolean') {
+        if ($attribute->phpType === 'boolean') {
             $format = 'boolean';
-        } elseif ($column->type === 'text') {
+        } elseif ($attribute->type === 'text') {
             $format = 'ntext';
-        } elseif (stripos($column->name, 'time') !== false && $column->phpType === 'integer') {
+        } elseif (stripos($attribute->name, 'time') !== false && $attribute->phpType === 'integer') {
             $format = 'datetime';
-        } elseif (stripos($column->name, 'email') !== false) {
+        } elseif (stripos($attribute->name, 'email') !== false) {
             $format = 'email';
-        } elseif (stripos($column->name, 'url') !== false) {
+        } elseif (stripos($attribute->name, 'url') !== false) {
             $format = 'url';
         } else {
             $format = 'text';
         }
 
-        return "        '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "'";
-    }
-
-    public function getColumnByAttribute($attribute, $model = null)
-    {
-        if (is_string($model)) {
-            $model = new $model;
-        }
-        if ($model === null) {
-            $model = $this;
-        }
-        return $model->getTableSchema()->getColumn($attribute);
+        return "\t\t\t'" . $attribute->name . ($format === 'text' ? "" : ":" . $format) . "'";
     }
 }

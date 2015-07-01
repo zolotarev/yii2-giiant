@@ -5,7 +5,7 @@
  * @license http://www.phundament.com/license/
  */
 
-namespace zolotarev\giiant\model;
+namespace schmunk42\giiant\model;
 
 use Yii;
 use yii\gii\CodeFile;
@@ -112,19 +112,16 @@ class Generator extends \yii\gii\generators\model\Generator
         foreach ($this->getTableNames() as $tableName) {
 
             $className = $this->generateClassName($tableName);
-            $queryClassName = ($this->generateQuery) ? $this->generateQueryClassName($className) : false;
+
             $tableSchema = $db->getTableSchema($tableName);
-            
             $params      = [
-                'tableName'      => $tableName,
-                'className'      => $className,
-                'queryClassName' => $queryClassName,
-                'tableSchema'    => $tableSchema,
-                'labels'         => $this->generateLabels($tableSchema),
-                'rules'          => $this->generateRules($tableSchema),
-                'relations'      => isset($relations[$tableName]) ? $relations[$tableName] : [],
-                'ns'             => $this->ns,
-                'enum'           => $this->getEnum($tableSchema->columns),
+                'tableName'   => $tableName,
+                'className'   => $className,
+                'tableSchema' => $tableSchema,
+                'labels'      => $this->generateLabels($tableSchema),
+                'rules'       => $this->generateRules($tableSchema),
+                'relations'   => isset($relations[$tableName]) ? $relations[$tableName] : [],
+                'ns'          => $this->ns,
             ];
 
             $files[] = new CodeFile(
@@ -139,21 +136,6 @@ class Generator extends \yii\gii\generators\model\Generator
                     $this->render('model-extended.php', $params)
                 );
             }
-
-            if ($queryClassName) {
-                $queryClassFile = Yii::getAlias('@' . str_replace('\\', '/', $this->queryNs)) . '/' . $queryClassName . '.php';
-                if ($this->generateModelClass || !is_file($queryClassFile)) {
-                    $params = [
-                        'className' => $queryClassName,
-                        'modelClassName' => $className,
-                    ];
-                    $files[] = new CodeFile(
-                        $queryClassFile,
-                        $this->render('query.php', $params)
-                    );
-                }
-            }
-
         }
         return $files;
     }
@@ -231,81 +213,5 @@ class Generator extends \yii\gii\generators\model\Generator
         }
         return $relations;
     }
-    
-    /**
-     * prepare ENUM field values
-     * @param array $columns
-     * @return array
-     */
-    public function getEnum($columns){
-
-        $enum = [];
-        foreach ($columns as $column) {
-            if (!$this->isEnum($column)) {
-                continue;
-            }
-
-            $column_camel_name = str_replace(' ', '', ucwords(implode(' ', explode('_', $column->name))));
-            $enum[$column->name]['func_opts_name'] = 'opts' . $column_camel_name;
-            $enum[$column->name]['func_get_label_name'] = 'get' . $column_camel_name.'ValueLabel';
-            $enum[$column->name]['values'] = [];
-
-            $enum_values = explode(',', substr($column->dbType, 4, strlen($column->dbType) - 1));
-
-            foreach ($enum_values as $value) {
-
-                $value = trim($value, "()'");
-
-                $const_name = strtoupper($column->name . '_' . $value);
-                $const_name = preg_replace('/\s+/','_',$const_name);
-                $const_name = str_replace(['-','_',' '],'_',$const_name);
-				$const_name=preg_replace('/[^A-Z0-9_]/', '', $const_name);
-
-                $label = ucwords(trim(strtolower(str_replace(['-', '_'], ' ', preg_replace('/(?<![A-Z])[A-Z]/', ' \0', $value)))));
-                $label = preg_replace('/\s+/', ' ', $label);
-
-                $enum[$column->name]['values'][] = [
-                    'value' => $value,
-                    'const_name' => $const_name,
-                    'label' => $label,
-                    ];
-
-            }
-        }
-        return $enum;        
-
-    }    
-    
-    /**
-     * validate is ENUM
-     * @param  $column table column
-     * @return type
-     */
-    public function isEnum($column){
-        return substr(strtoupper($column->dbType), 0, 4) == 'ENUM';
-    }
-
-
-    /**
-     * Generates validation rules for the specified table and add enum value validation.
-     * @param \yii\db\TableSchema $table the table schema
-     * @return array the generated validation rules
-     */
-    public function generateRules($table)
-    {
-        $rules = [];
-        
-        //for enum fields create rules "in range" for all enum values
-        $enum = $this->getEnum($table->columns);        
-        foreach($enum as $field_name => $field_details){
-            $ea = array();
-            foreach($field_details['values'] as $field_enum_values){
-                $ea[] = 'self::'.$field_enum_values['const_name'];
-            }
-            $rules[] = "['" .$field_name . "', 'in', 'range' => [\n                    " . implode(",\n                    ",$ea) . ",\n                ]\n            ]";
-        }        
-        
-        return array_merge(parent::generateRules($table),$rules);
-    }    
 
 }

@@ -6,7 +6,7 @@ use yii\helpers\StringHelper;
  * This is the template for generating a CRUD controller class file.
  *
  * @var yii\web\View $this
- * @var zolotarev\giiant\crud\Generator $generator
+ * @var schmunk42\giiant\crud\Generator $generator
  */
 
 $controllerClass = StringHelper::basename($generator->controllerClass);
@@ -47,7 +47,6 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     public $enableCsrfValidation = false;
 
 	/**
-     * Restrict access permissions to admin user and users with auth-item 'module-controller'
 	 * @inheritdoc
 	 */
 	public function behaviors()
@@ -55,22 +54,28 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
 		return [
 			'access' => [
 				'class' => AccessControl::className(),
-					'rules' => [
+				'rules' => [
 					[
 						'allow' 	=> true,
 						'actions'   => ['index', 'view', 'create', 'update', 'delete'],
-						'matchCallback' => function($rule, $action) {
-							return
-								\Yii::$app->user->can(strtr($this->module->id, ['/' => '_', '-' => '_'])) ||
-								\Yii::$app->user->can(strtr($this->module->id . '/' . $this->id, ['/' => '_', '-' => '_'])) ||
-								\Yii::$app->user->can(strtr($this->module->id . '/' . $this->id . '/' . $action->id, ['/' => '_', '-' => '_'])) ||
-								(\Yii::$app->user->identity && \Yii::$app->user->identity->isAdmin);
-						},
+						'roles'     => ['@']
 					]
 				]
 			]
 		];
 	}
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeAction($action)
+    {
+        if (parent::beforeAction($action)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 	/**
 	 * Lists all <?= $modelClass ?> models.
@@ -100,8 +105,11 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
 	 */
 	public function actionView(<?= $actionParams ?>)
 	{
+        $resolved = \Yii::$app->request->resolve();
+        $resolved[1]['_pjax'] = null;
+        $url = Url::to(array_merge(['/'.$resolved[0]],$resolved[1]));
         \Yii::$app->session['__crudReturnUrl'] = Url::previous();
-        Url::remember();
+        Url::remember($url);
         Tabs::rememberActiveState();
 
         return $this->render('view', [

@@ -6,7 +6,7 @@
  * Time: 01:02
  */
 
-namespace zolotarev\giiant\base;
+namespace schmunk42\giiant\base;
 
 
 use yii\base\Object;
@@ -14,7 +14,7 @@ use yii\base\Object;
 class Provider extends Object
 {
     /**
-     * @var \zolotarev\giiant\crud\Generator
+     * @var \schmunk42\giiant\crud\Generator
      */
     public $generator;
 

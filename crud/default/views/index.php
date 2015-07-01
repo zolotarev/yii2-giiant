@@ -5,24 +5,11 @@ use yii\helpers\StringHelper;
 
 /**
  * @var yii\web\View $this
- * @var zolotarev\giiant\crud\Generator $generator
+ * @var schmunk42\giiant\crud\Generator $generator
  */
 
 $urlParams = $generator->generateUrlParams();
 $nameAttribute = $generator->getNameAttribute();
-
-/** @var \yii\db\ActiveRecord $model */
-$model = new $generator->modelClass;
-$model->setScenario('crud');
-$safeAttributes = $model->safeAttributes();
-if (empty($safeAttributes)) {
-    /** @var \yii\db\ActiveRecord $model */
-    $model = new $generator->modelClass;
-    $safeAttributes = $model->safeAttributes();
-    if (empty($safeAttributes)) {
-        $safeAttributes = $model->getTableSchema()->columnNames;
-    }
-}
 
 echo "<?php\n";
 ?>
@@ -41,7 +28,7 @@ use <?= $generator->indexWidgetType === 'grid' ? "yii\\grid\\GridView" : "yii\\w
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
-<div class="giiant-crud <?= Inflector::camel2id(StringHelper::basename($generator->modelClass), '-', true) ?>-index">
+<div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass), '-', true) ?>-index">
 
     <?=
     "<?php " . ($generator->indexWidgetType === 'grid' ? "// " : "") ?>
@@ -85,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'id'       => 'giiant-relations',
                     'encodeLabel' => false,
-                    'label'    => '<span class="glyphicon glyphicon-paperclip"></span> ' . <?= $generator->generateString('Relations') ?>,
+                    'label'    => '<span class="glyphicon glyphicon-paperclip"></span>' . <?= Yii::t('backend', 'Relations'),
                     'dropdown' => [
                         'options'      => [
                             'class' => 'dropdown-menu-right'
@@ -93,9 +80,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         'encodeLabels' => false,
                         'items'        => <?= \yii\helpers\VarDumper::export($items) ?>
                     ],
-                    'options' => [
-                        'class' => 'btn-default'
-                    ]
                 ]
             );
             <?= "?>" ?>
@@ -104,13 +88,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if ($generator->indexWidgetType === 'grid'): ?>
 
-        <?= "<?php \yii\widgets\Pjax::begin(['id'=>'pjax-main', 'enableReplaceState'=> false, 'linkSelector'=>'#pjax-main ul.pagination a, th a', 'clientOptions' => ['pjax:success'=>'function(){alert(\"yo\")}']]) ?>\n"; ?>
-
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h2>
-                    <i><?= Inflector::pluralize(Inflector::camel2words(StringHelper::basename($generator->modelClass))) ?></i>
-                </h2>
+                <?= Inflector::pluralize(Inflector::camel2words(StringHelper::basename($generator->modelClass))) ?>
             </div>
 
             <div class="panel-body">
@@ -125,8 +105,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'lastPageLabel'  => <?= $generator->generateString('Last') ?>
                 ],
                 'filterModel' => $searchModel,
-                'tableOptions' => ['class' => 'table table-striped table-bordered table-hover'],
-                'headerRowOptions' => ['class'=>'x'],
                 'columns' => [
 
                 <?php
@@ -149,8 +127,8 @@ PHP;
                 $count = 0;
                 echo "\n"; // code-formatting
 
-                foreach ($safeAttributes as $attribute) {
-                    $format = trim($generator->columnFormat($attribute,$model));
+                foreach ($generator->getTableSchema()->columns as $column) {
+                    $format = trim($generator->columnFormat($column,$model));
                     if ($format == false) continue;
                     if (++$count < $generator->gridMaxColumns) {
                         echo "\t\t\t{$format},\n";
@@ -168,7 +146,6 @@ PHP;
 
         </div>
 
-        <?= "<?php \yii\widgets\Pjax::end() ?>\n"; ?>
 
     <?php else: ?>
 
