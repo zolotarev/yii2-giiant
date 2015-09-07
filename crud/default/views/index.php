@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'id'       => 'giiant-relations',
                     'encodeLabel' => false,
-                    'label'    => '<span class="glyphicon glyphicon-paperclip"></span>' . <?= Yii::t('backend', 'Relations'),
+                    'label'    => '<span class="glyphicon glyphicon-paperclip"></span>' . '<?= Yii::t('backend', 'Relations')?>',
                     'dropdown' => [
                         'options'      => [
                             'class' => 'dropdown-menu-right'
